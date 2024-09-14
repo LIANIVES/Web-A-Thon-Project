@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+    <style>
+        /* Global Styles */
+        body {
+            background-image: url('node-axios-api/public/istockphoto-1488335095-612x612.jpg');
+            background-size: cover;
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background-color: #007bff;
+            padding: 1rem;
+            color: #fff;
+            text-align: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        /* Main Container */
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding-top: 70px; /* Height of the navbar */
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        label {
+            font-size: 1.1rem;
+            margin-right: 0.5rem;
+            color: #333;
+        }
+
+        input[type="text"] {
+            padding: 0.5rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 300px;
+            max-width: 100%;
+        }
+
+        button {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        pre {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 1rem;
+            border-radius: 5px;
+            width: 300px;
+            max-width: 100%;
+            text-align: left;
+            overflow-x: auto;
+        }
+
+        /* Additional styles for sessionId display */
+        #sessionId {
+            margin-top: 1rem;
+            font-size: 1rem;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>Chat App</h1>
+    </div>
+    <div class="container">
+        <div class="form-group">
+            <label for="userQuery">Enter your query:</label>
+            <input type="text" id="userQuery" placeholder="Type your query here">
+        </div>
+        <button id="startChat">Start Chat</button>
+        <button id="createSession">Create Session</button>
+        <div id="sessionId">Session ID will appear here</div>
+        <pre id="chatResponse"></pre>
+    </div>
+
+    <script>
+      document.getElementById('createSession').addEventListener('click', async () => {
+          try {
+              const response = await fetch('/start-chat', { method: 'POST' });
+              if (!response.ok) {
+                  throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              const data = await response.json();
+              document.getElementById('sessionId').innerText = data.sessionId || 'No session ID received';
+              console.log('Session ID:', data.sessionId);
+          } catch (error) {
+              console.error('Error creating session:', error);
+              document.getElementById('sessionId').innerText = 'Error creating session';
+          }
+      });
+  
+      document.getElementById('startChat').addEventListener('click', async () => {
+          const query = document.getElementById('userQuery').value;
+          const sessionId = document.getElementById('sessionId').innerText;
+  
+          if (!query) {
+              alert('Please enter a query');
+              return;
+          }
+          if (!sessionId || sessionId === 'Session ID will appear here') {
+              alert('Please create a session first');
+              return;
+          }
+  
+          try {
+              const response = await fetch(`/start-chat`, {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ query, sessionId })
+              });
+              const data = await response.json();
+              document.getElementById('chatResponse').innerText = JSON.stringify(data, null, 2);
+              console.log('Query response:', data);
+          } catch (error) {
+              console.error('Error submitting query:', error);
+          }
+      });
+  </script>
+  
+</body>
+</html>
